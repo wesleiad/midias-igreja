@@ -53,6 +53,10 @@ export default function Configuracoes({ cfg, mudarCfg, fotos, logoUrl, recarrega
   const marca = cfg.marca;
   const setMarca = (p) => mudarCfg({ marca: { ...marca, ...p } });
   const [erro, setErro] = useState(null);
+  const [versao, setVersao] = useState("");
+  useEffect(() => {
+    window.api.versao().then(setVersao);
+  }, []);
   const fundo = fotos.find((f) => f.categoria === "boa" && f.largura > f.altura)?.miniatura;
   const preset = PRESETS.find((p) => p.id === cfg.filtroPadrao.presetId);
 
@@ -148,6 +152,9 @@ export default function Configuracoes({ cfg, mudarCfg, fotos, logoUrl, recarrega
           onChange={(qualidadeJpeg) => mudarCfg({ qualidadeJpeg })}
         />
       </div>
+      <p className="dica centro" style={{ padding: ".5rem 0 1rem" }}>
+        Mídias - Igreja · versão {versao} · atualiza sozinho
+      </p>
     </section>
   );
 }
