@@ -25,6 +25,8 @@ export default function App() {
   const [apagar, setApagar] = useState(() => new Set());
   const [logoUrl, setLogoUrl] = useState(null);
   const cancelado = useRef(false);
+  const [atualizacao, setAtualizacao] = useState(null);
+  useEffect(() => window.api.onAtualizacao(setAtualizacao), []);
 
   const limites = useMemo(() => limitesDoRigor(cfg?.rigor), [cfg?.rigor]);
   const fotos = useMemo(() => classificar(brutas, limites, porCaminho), [brutas, limites]);
@@ -122,6 +124,12 @@ export default function App() {
             {scan.pasta && <small title={scan.pasta}>{scan.pasta}</small>}
           </div>
         </div>
+        {atualizacao?.estado === "baixando" && <span className="atualiza">Baixando atualização… {atualizacao.pct ?? 0}%</span>}
+        {atualizacao?.estado === "pronta" && (
+          <button className="atualiza pronta" onClick={() => window.api.instalarAtualizacao()}>
+            Nova versão {atualizacao.versao} pronta · Reiniciar agora
+          </button>
+        )}
         <nav className="abas">
           {ABAS.map((a) => (
             <button key={a.id} className={aba === a.id ? "ativa" : ""} onClick={() => setAba(a.id)}>

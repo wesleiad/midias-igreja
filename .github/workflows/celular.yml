@@ -1,0 +1,38 @@
+# A cada envio pro GitHub que mexa no app de celular:
+# - mudança só de código/tela  -> atualização pelo ar (o app baixa sozinho ao abrir)
+# - mudança em módulo nativo   -> gera um APK novo no EAS (instalar uma vez no celular)
+name: Celular - publicar atualização
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**", "core/**", ".github/workflows/celular.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency: celular-deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+        working-directory: mobile
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - uses: expo/expo-github-action/continuous-deploy-fingerprint@main
+        with:
+          profile: preview
+          branch: preview
+          platform: android
+          working-directory: mobile

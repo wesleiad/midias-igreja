@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import * as Updates from "expo-updates";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { classificar, sugeridasParaApagar } from "../core/index.js";
 import { useConfig, limitesDoRigor, carregarLogo } from "./src/config.js";
@@ -28,6 +29,16 @@ export default function App() {
   const [apagar, setApagar] = useState(() => new Set());
   const [logo, setLogo] = useState(null);
   const cancelado = useRef(false);
+  const [novaVersao, setNovaVersao] = useState(false);
+
+  // Atualização pelo ar: baixa em segundo plano e oferece reiniciar.
+  useEffect(() => {
+    if (__DEV__ || !Updates.isEnabled) return;
+    Updates.checkForUpdateAsync()
+      .then((r) => (r.isAvailable ? Updates.fetchUpdateAsync() : null))
+      .then((r) => r?.isNew && setNovaVersao(true))
+      .catch(() => {});
+  }, []);
 
   const limites = useMemo(() => limitesDoRigor(cfg?.rigor), [cfg?.rigor]);
   const fotos = useMemo(() => classificar(brutas, limites, porId), [brutas, limites]);
@@ -105,6 +116,11 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <SafeAreaView style={s.tela} edges={["top", "left", "right"]}>
+        {novaVersao && (
+          <Pressable onPress={() => Updates.reloadAsync()} style={{ backgroundColor: C.pri, paddingVertical: 8, alignItems: "center" }}>
+            <Text style={{ color: "#fff", fontWeight: "700" }}>Nova versão pronta · toque para reiniciar</Text>
+          </Pressable>
+        )}
         <View style={{ flex: 1 }}>
           {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={() => (cancelado.current = true)} />}
           {aba === "revisar" && <Revisar {...props} apagarMarcadas={apagarMarcadas} />}

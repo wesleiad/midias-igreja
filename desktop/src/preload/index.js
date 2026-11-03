@@ -17,4 +17,11 @@ contextBridge.exposeInMainWorld("api", {
   salvarLogo: chamar("salvarLogo"),
   removerLogo: chamar("removerLogo"),
   caminhoLogo: chamar("caminhoLogo"),
+  instalarAtualizacao: chamar("instalarAtualizacao"),
+  versao: chamar("versao"),
+  onAtualizacao: (cb) => {
+    const f = (_e, dados) => cb(dados);
+    ipcRenderer.on("atualizacao", f);
+    return () => ipcRenderer.removeListener("atualizacao", f);
+  },
 });

@@ -1,0 +1,36 @@
+# A cada envio pro GitHub que mexa no app de PC: gera o instalador e publica como Release.
+# O app instalado acha a versão nova sozinho e oferece reiniciar.
+name: PC - publicar atualização
+
+on:
+  push:
+    branches: [main]
+    paths: ["desktop/**", "core/**", ".github/workflows/pc.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: pc-release
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - name: Versão automática (0.1.N)
+        run: npm version "0.1.${{ github.run_number }}" --no-git-tag-version
+      - run: npx electron-vite build
+      - name: Gerar instalador e publicar Release
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

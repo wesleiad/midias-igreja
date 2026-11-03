@@ -68,6 +68,10 @@ h2 { font-size: 1rem; font-weight: 600; margin: 0 0 .7rem; color: var(--claro); 
 .tela { padding: 1.6rem; max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
 .tela.vazia { align-items: center; justify-content: center; height: 100%; color: var(--suave); }
 
+.atualiza { margin-left: auto; font-size: .78rem; color: var(--suave); white-space: nowrap; }
+.atualiza.pronta { background: var(--pri); color: #fff; border: 0; border-radius: 99px; padding: .3rem .8rem; cursor: pointer; font-weight: 600; }
+.atualiza.pronta:hover { background: var(--pri2); }
+
 /* ---------- Blocos comuns ---------- */
 .cartao { background: var(--painel); border: 1px solid var(--borda); border-radius: 8px; padding: 1.2rem 1.3rem; }
 .cartao.destaque {

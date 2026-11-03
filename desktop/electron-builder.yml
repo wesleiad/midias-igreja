@@ -15,3 +15,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   shortcutName: Mídias - Igreja
+publish:
+  provider: github
+  owner: wesleiad
+  repo: midias-igreja
+  releaseType: release

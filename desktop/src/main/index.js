@@ -2,6 +2,9 @@ import { app, BrowserWindow, ipcMain, dialog, shell, protocol, net } from "elect
 import { join, extname, basename, dirname } from "path";
 import { pathToFileURL } from "url";
 import fs from "fs/promises";
+import updater from "electron-updater";
+
+const { autoUpdater } = updater;
 
 // Dev e instalado nunca dividem a mesma pasta de dados (evita apagar a config real ao testar).
 if (!app.isPackaged) app.setPath("userData", join(app.getPath("appData"), "Midias Igreja (dev)"));
@@ -78,6 +81,8 @@ function registrarIpc() {
     return destino;
   });
 
+  ipcMain.handle("instalarAtualizacao", () => autoUpdater.quitAndInstall(true, true));
+  ipcMain.handle("versao", () => app.getVersion());
   ipcMain.handle("abrirPasta", (_e, caminho) => shell.openPath(caminho));
 
   ipcMain.handle("lerConfig", async () => {
@@ -124,6 +129,21 @@ function registrarIpc() {
   });
 }
 
+// Atualização automática: baixa sozinha do GitHub Releases e avisa na tela quando estiver pronta.
+function configurarAtualizacao(win) {
+  if (!app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  const avisar = (estado, extra = {}) => !win.isDestroyed() && win.webContents.send("atualizacao", { estado, ...extra });
+  autoUpdater.on("update-available", (i) => avisar("baixando", { versao: i.version, pct: 0 }));
+  autoUpdater.on("download-progress", (p) => avisar("baixando", { pct: Math.round(p.percent) }));
+  autoUpdater.on("update-downloaded", (i) => avisar("pronta", { versao: i.version }));
+  autoUpdater.on("error", () => avisar("erro"));
+  const checar = () => autoUpdater.checkForUpdates().catch(() => {});
+  checar();
+  setInterval(checar, 60 * 60 * 1000);
+}
+
 function criarJanela() {
   const win = new BrowserWindow({
     width: 1280,
@@ -138,6 +158,7 @@ function criarJanela() {
   });
   if (process.env.ELECTRON_RENDERER_URL) win.loadURL(process.env.ELECTRON_RENDERER_URL);
   else win.loadFile(join(__dirname, "../renderer/index.html"));
+  win.webContents.once("did-finish-load", () => configurarAtualizacao(win));
 }
 
 app.whenReady().then(() => {
