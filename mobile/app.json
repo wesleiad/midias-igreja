@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Fotos Com.Vida",
+    "name": "Mídias - Igreja",
     "slug": "fotos-comvida",
     "version": "0.1.0",
     "orientation": "default",
@@ -32,8 +32,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "O Fotos Com.Vida precisa ver suas fotos para separar as boas das ruins.",
-          "savePhotosPermission": "O Fotos Com.Vida salva as fotos melhoradas no álbum Fotos Com.Vida.",
+          "photosPermission": "O Mídias - Igreja precisa ver suas fotos para separar as boas das ruins.",
+          "savePhotosPermission": "O Mídias - Igreja salva as fotos melhoradas no álbum Mídias - Igreja.",
           "isAccessMediaLocationEnabled": false
         }
       ],

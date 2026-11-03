@@ -4,7 +4,7 @@ import { pathToFileURL } from "url";
 import fs from "fs/promises";
 
 // Dev e instalado nunca dividem a mesma pasta de dados (evita apagar a config real ao testar).
-if (!app.isPackaged) app.setPath("userData", join(app.getPath("appData"), "Fotos ComVida (dev)"));
+if (!app.isPackaged) app.setPath("userData", join(app.getPath("appData"), "Midias Igreja (dev)"));
 
 const EXTENSOES = new Set([".jpg", ".jpeg", ".png", ".webp", ".bmp"]);
 const IGNORADAS = new Set([".heic", ".heif", ".raw", ".cr2", ".nef", ".dng"]);
@@ -131,7 +131,7 @@ function criarJanela() {
     minWidth: 380,
     minHeight: 560,
     backgroundColor: "#0f1115",
-    title: "Fotos Com.Vida",
+    title: "Mídias - Igreja",
     icon: join(__dirname, "../../build/icon.png"),
     autoHideMenuBar: true,
     webPreferences: { preload: join(__dirname, "../preload/index.mjs"), sandbox: false },

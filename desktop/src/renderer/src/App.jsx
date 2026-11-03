@@ -117,7 +117,7 @@ export default function App() {
           <img className="logo-app" src={icone} alt="" />
           <div>
             <strong>
-              Fotos <span>Com.Vida</span>
+              Mídias <span>Igreja</span>
             </strong>
             {scan.pasta && <small title={scan.pasta}>{scan.pasta}</small>}
           </div>

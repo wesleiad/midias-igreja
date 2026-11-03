@@ -6,7 +6,7 @@ import { File, Paths } from "expo-file-system";
 import { Skia, AlphaType, ColorType } from "@shopify/react-native-skia";
 import { analisarImagem, LADO_ANALISE } from "../../core/index.js";
 
-export const NOME_ALBUM = "Fotos Com.Vida";
+export const NOME_ALBUM = "Mídias - Igreja";
 
 export async function pedirPermissao() {
   const r = await ML.requestPermissionsAsync(false, ["photo"]);
@@ -84,7 +84,7 @@ export async function apagarFotos(ids) {
   return ML.deleteAssetsAsync(ids);
 }
 
-/** Salva bytes JPEG na galeria, dentro do álbum "Fotos Com.Vida". */
+/** Salva bytes JPEG na galeria, dentro do álbum "Mídias - Igreja". */
 export async function salvarNaGaleria(bytes, nome) {
   const arq = new File(Paths.cache, `${nome.replace(/\.[^.]+$/, "")}-comvida-${Date.now()}.jpg`);
   arq.create({ overwrite: true });

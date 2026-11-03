@@ -1,5 +1,5 @@
-appId: com.wesleiad.fotos-comvida
-productName: Fotos Com.Vida
+appId: com.wesleiad.midias-igreja
+productName: Mídias - Igreja
 directories:
   buildResources: build
 files:
@@ -9,9 +9,9 @@ win:
   icon: build/icon.png
   target:
     - target: nsis
-  artifactName: Fotos-ComVida-${version}-setup.${ext}
+  artifactName: Midias-Igreja-${version}-setup.${ext}
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
-  shortcutName: Fotos Com.Vida
+  shortcutName: Mídias - Igreja

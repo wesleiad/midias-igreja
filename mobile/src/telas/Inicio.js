@@ -32,7 +32,7 @@ export default function Inicio({ fotos, scan, apagar, escanear, cancelar, irPara
   return (
     <ScrollView contentContainerStyle={s.pad}>
       <View style={s.cartao}>
-        <Text style={s.titulo}>Fotos Com.Vida</Text>
+        <Text style={s.titulo}>Mídias - Igreja</Text>
         <Text style={s.suave}>
           Verifica nitidez, luz e fotos repetidas, sugere o que apagar e depois melhora as que ficaram, com a marca d'água da
           igreja se quiser.
