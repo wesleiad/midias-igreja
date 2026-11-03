@@ -14,7 +14,7 @@
     "android": {
       "package": "com.wesleidomingues.fotoscomvida",
       "adaptiveIcon": {
-        "backgroundColor": "#0f1115",
+        "backgroundColor": "#17191d",
         "foregroundImage": "./assets/adaptive-icon.png"
       },
       "blockedPermissions": [

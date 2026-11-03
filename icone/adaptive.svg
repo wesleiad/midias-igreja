@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1f2126"/><stop offset="100%" stop-color="#0e0f12"/></linearGradient>
+    <linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd889"/><stop offset="100%" stop-color="#f5a524"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f5a524" stop-opacity=".32"/><stop offset="100%" stop-color="#f5a524" stop-opacity="0"/></radialGradient>
+    <linearGradient id="aro" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2a2c33"/><stop offset="100%" stop-color="#0e0f12"/></linearGradient>
+    <radialGradient id="vidro" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#2b3140"/><stop offset="100%" stop-color="#07080a"/></radialGradient>
+  </defs>
+  <circle cx="256" cy="262" r="170" fill="url(#glow)"/>
+  <g transform="translate(256 262) scale(0.62) translate(-256 -262)">
+  <!-- corpo da câmera -->
+  <rect x="168" y="112" width="124" height="64" rx="18" fill="url(#ouro)"/>
+  <rect x="98" y="128" width="52" height="26" rx="9" fill="#e8951a"/>
+  <rect x="72" y="150" width="368" height="252" rx="46" fill="url(#ouro)"/>
+  <rect x="72" y="150" width="368" height="252" rx="46" fill="none" stroke="#fff3d1" stroke-opacity=".35" stroke-width="2"/>
+  <rect x="362" y="176" width="46" height="22" rx="7" fill="#0e0f12" fill-opacity=".55"/>
+  <!-- lente -->
+  <circle cx="256" cy="282" r="118" fill="#0e0f12"/>
+  <circle cx="256" cy="282" r="118" fill="none" stroke="#2a2c33" stroke-width="4"/>
+  <circle cx="256" cy="282" r="100" fill="url(#aro)"/>
+  <circle cx="256" cy="282" r="90" fill="none" stroke="#f5a524" stroke-opacity=".55" stroke-width="3"/>
+  <circle cx="256" cy="282" r="84" fill="url(#vidro)"/>
+  <!-- símbolo da igreja no centro da lente -->
+  <g transform="translate(256 286) scale(0.29) translate(-500 -508)">
+    <clipPath id="gota"><path d="M500 290 C 470 330, 334 470, 334 560 A166 166 0 0 0 666 560 C 666 470, 530 330, 500 290 Z"/></clipPath>
+    <path d="M500 290 C 470 330, 334 470, 334 560 A166 166 0 0 0 666 560 C 666 470, 530 330, 500 290 Z" fill="#EE1C2E"/>
+    <g clip-path="url(#gota)">
+      <rect x="481" y="420" width="38" height="340" rx="10" fill="#fff"/>
+      <rect x="404" y="508" width="192" height="38" rx="10" fill="#fff"/>
+    </g>
+  </g>
+  <!-- reflexo no vidro -->
+  <path d="M196 236 A 76 76 0 0 1 268 204" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="7" stroke-linecap="round"/>
+  </g>
+</svg>
