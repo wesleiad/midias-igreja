@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { avaliar, agruparDuplicadas } from "@core/index.js";
+import { classificar, sugeridasParaApagar } from "@core/index.js";
 import { executar, limparFila, definirLogo, urlFoto } from "./motor.js";
 import { useConfig, limitesDoRigor } from "./config.js";
 import Inicio from "./telas/Inicio.jsx";
@@ -14,30 +14,7 @@ const ABAS = [
   { id: "config", nome: "Ajustes", icone: "⚙" },
 ];
 
-/** Junta medidas + rigor + duplicadas e decide a categoria de cada foto. */
-function classificar(fotos, limites) {
-  const medidas = fotos.filter((f) => f.medidas);
-  const grupos = agruparDuplicadas(
-    medidas.map((f) => ({ id: f.caminho, hash: f.medidas.hash, nota: f.medidas.nota })),
-    limites.distanciaDuplicada,
-  );
-  const dup = new Map();
-  grupos.forEach((g, gi) => g.forEach((it, k) => dup.set(it.id, { grupo: gi, melhor: k === 0 })));
-  return fotos.map((f) => {
-    if (f.erro) return { ...f, categoria: "ruim", problemas: ["Arquivo não abriu (pode estar corrompido)"], grupo: null };
-    if (!f.medidas) return { ...f, categoria: "pendente", problemas: [], grupo: null };
-    const { veredito, problemas } = avaliar(f.medidas, limites);
-    const d = dup.get(f.caminho);
-    const duplicada = d && !d.melhor;
-    return {
-      ...f,
-      problemas: duplicada ? ["Repetida (há uma versão melhor)", ...problemas] : problemas,
-      categoria: veredito === "ruim" ? "ruim" : duplicada ? "duplicada" : veredito,
-      grupo: d?.grupo ?? null,
-      melhorDoGrupo: !!d?.melhor,
-    };
-  });
-}
+const porCaminho = (f) => f.caminho;
 
 export default function App() {
   const [cfg, mudarCfg] = useConfig();
@@ -49,7 +26,7 @@ export default function App() {
   const cancelado = useRef(false);
 
   const limites = useMemo(() => limitesDoRigor(cfg?.rigor), [cfg?.rigor]);
-  const fotos = useMemo(() => classificar(brutas, limites), [brutas, limites]);
+  const fotos = useMemo(() => classificar(brutas, limites, porCaminho), [brutas, limites]);
 
   // Carrega o logo salvo e entrega aos workers.
   const recarregarLogo = useCallback(async () => {
@@ -105,8 +82,7 @@ export default function App() {
     );
     atualizar(true);
     // Já deixa marcadas pra apagar as ruins (que abriram) e as repetidas.
-    const classificadas = classificar(atual, limites);
-    setApagar(new Set(classificadas.filter((f) => (f.categoria === "ruim" && !f.erro) || f.categoria === "duplicada").map((f) => f.caminho)));
+    setApagar(new Set(sugeridasParaApagar(classificar(atual, limites, porCaminho)).map((f) => f.caminho)));
     setScan((s) => ({ ...s, estado: cancelado.current ? "cancelado" : "pronto", feitas }));
     if (!cancelado.current) setAba("revisar");
   }
