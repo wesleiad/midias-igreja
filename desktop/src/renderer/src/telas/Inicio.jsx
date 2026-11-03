@@ -70,10 +70,10 @@ export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, c
           </div>
           <div className="linha-acoes">
             <button className="btn primario" onClick={() => irPara("revisar")}>
-              Revisar {apagar.size ? `(${apagar.size} marcadas pra apagar)` : ""}
+              Abrir Biblioteca {apagar.size ? `(${apagar.size} recusadas)` : ""}
             </button>
             <button className="btn" onClick={() => irPara("melhorar")}>
-              Ir direto para Melhorar
+              Ir para Revelar
             </button>
           </div>
         </div>

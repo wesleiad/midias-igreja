@@ -6,11 +6,12 @@ import Inicio from "./telas/Inicio.jsx";
 import Revisar from "./telas/Revisar.jsx";
 import Melhorar from "./telas/Melhorar.jsx";
 import Configuracoes from "./telas/Configuracoes.jsx";
+import icone from "../../../build/icon.png";
 
 const ABAS = [
-  { id: "inicio", nome: "Escanear", icone: "⌕" },
-  { id: "revisar", nome: "Revisar", icone: "☑" },
-  { id: "melhorar", nome: "Melhorar", icone: "✦" },
+  { id: "inicio", nome: "Importar", icone: "⇣" },
+  { id: "revisar", nome: "Biblioteca", icone: "▦" },
+  { id: "melhorar", nome: "Revelar", icone: "◐" },
   { id: "config", nome: "Ajustes", icone: "⚙" },
 ];
 
@@ -113,9 +114,11 @@ export default function App() {
     <div className="app">
       <header className="topo">
         <div className="marca-app">
-          <span className="logo-app">◐</span>
+          <img className="logo-app" src={icone} alt="" />
           <div>
-            <strong>Fotos Com.Vida</strong>
+            <strong>
+              Fotos <span>Com.Vida</span>
+            </strong>
             {scan.pasta && <small title={scan.pasta}>{scan.pasta}</small>}
           </div>
         </div>
@@ -129,7 +132,7 @@ export default function App() {
           ))}
         </nav>
       </header>
-      <main className="conteudo">
+      <main className={"conteudo modulo-" + aba}>
         {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={cancelar} />}
         {aba === "revisar" && <Revisar {...props} moverParaLixeira={moverParaLixeira} />}
         {aba === "melhorar" && <Melhorar {...props} />}

@@ -5,10 +5,10 @@ import { Botao, Chip, C, s, NOMES_CATEGORIA } from "../ui.js";
 
 const ORDEM = ["ruim", "duplicada", "duvida", "boa"];
 const DICAS = {
-  ruim: "Desfocadas, tremidas, escuras ou estouradas. Já vêm marcadas pra apagar.",
-  duplicada: "Fotos quase iguais. A melhor de cada grupo fica; as outras vêm marcadas.",
-  duvida: "Passáveis, com algum defeito. Nada marcado: você decide.",
-  boa: "Boas. Nada marcado.",
+  ruim: "Desfocadas, tremidas, escuras ou estouradas. Já vêm recusadas.",
+  duplicada: "Fotos quase iguais. A melhor de cada grupo fica; as outras vêm recusadas.",
+  duvida: "Passáveis, com algum defeito. Você decide.",
+  boa: "Boas. Nada recusado.",
 };
 
 export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan, irPara }) {
@@ -57,7 +57,7 @@ export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan
     return (
       <View style={[s.pad, { flex: 1, justifyContent: "center", alignItems: "center" }]}>
         <Text style={s.suave}>Nenhuma foto escaneada ainda.</Text>
-        <Botao titulo="Escanear" tipo="primario" onPress={() => irPara("inicio")} />
+        <Botao titulo="Importar" tipo="primario" onPress={() => irPara("inicio")} />
       </View>
     );
 
@@ -73,8 +73,8 @@ export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan
         </View>
         <Text style={s.suave}>{DICAS[cat]}</Text>
         <View style={s.linha}>
-          <Botao titulo="Marcar todas" onPress={() => marcarTodas(true)} />
-          <Botao titulo="Desmarcar todas" onPress={() => marcarTodas(false)} />
+          <Botao titulo="Recusar todas" onPress={() => marcarTodas(true)} />
+          <Botao titulo="Manter todas" onPress={() => marcarTodas(false)} />
         </View>
         {scan.estado === "analisando" && <Text style={s.avisoTxt}>Ainda analisando… a lista se completa sozinha.</Text>}
         {msg && (
@@ -98,19 +98,17 @@ export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan
             <Pressable
               onPress={() => alternar(item.id)}
               onLongPress={() => setAberta(index)}
-              style={{ width: lado, height: lado, borderRadius: 10, overflow: "hidden", borderWidth: 2, borderColor: marcada ? C.ruim : "transparent" }}
+              style={{ width: lado, height: lado + 22, borderRadius: 3, backgroundColor: marcada ? "#2a1d1d" : "#262626" }}
             >
-              <Image source={{ uri: item.uri }} style={{ flex: 1, opacity: marcada ? 0.5 : 1 }} contentFit="cover" recyclingKey={item.id} />
-              {item.melhorDoGrupo && (
-                <Text style={{ position: "absolute", top: 4, left: 4, backgroundColor: C.boa, color: "#062016", fontSize: 11, fontWeight: "700", paddingHorizontal: 5, borderRadius: 5 }}>
-                  Fica
+              <Text style={{ position: "absolute", top: 0, left: 5, fontSize: 18, fontWeight: "700", color: "#ffffff14" }}>{index + 1}</Text>
+              <Image source={{ uri: item.uri }} style={{ flex: 1, margin: 8, marginBottom: 2, opacity: marcada ? 0.35 : 1 }} contentFit="contain" recyclingKey={item.id} />
+              <View style={{ height: 20, flexDirection: "row", alignItems: "center", paddingHorizontal: 6, gap: 4 }}>
+                <Text style={{ color: marcada ? "#ff7a72" : "#666", fontSize: marcada ? 10 : 12, fontWeight: marcada ? "700" : "400" }}>
+                  {marcada ? "⚑ Recusada" : "⚐"}
                 </Text>
-              )}
-              {marcada && (
-                <Text style={{ position: "absolute", bottom: 4, right: 4, backgroundColor: C.ruim, color: "#fff", fontSize: 11, fontWeight: "700", paddingHorizontal: 5, borderRadius: 5 }}>
-                  Apagar
-                </Text>
-              )}
+                {item.melhorDoGrupo && <Text style={{ color: C.boa, fontSize: 10 }}>★ melhor</Text>}
+                <Text style={{ marginLeft: "auto", color: "#888", fontSize: 10 }}>{item.medidas?.nota ?? ""}</Text>
+              </View>
             </Pressable>
           );
         }}
@@ -118,12 +116,12 @@ export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan
 
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 12, paddingHorizontal: 16, borderTopWidth: 1, borderTopColor: C.borda, backgroundColor: "#12151b" }}>
         <Text style={s.texto}>
-          <Text style={{ fontWeight: "700" }}>{apagar.size}</Text> marcadas
+          <Text style={{ fontWeight: "700" }}>{apagar.size}</Text> recusadas
         </Text>
-        <Botao titulo={apagando ? "Apagando…" : "Apagar marcadas"} tipo="perigo" desabilitado={!apagar.size || apagando} onPress={apagarAgora} />
+        <Botao titulo={apagando ? "Apagando…" : "Apagar recusadas"} tipo="perigo" desabilitado={!apagar.size || apagando} onPress={apagarAgora} />
       </View>
       <Text style={[s.suave, { fontSize: 12, textAlign: "center", paddingBottom: 6, backgroundColor: "#12151b" }]}>
-        Toque marca/desmarca · segure pra ver grande ·{" "}
+        Toque recusa/mantém · segure pra ampliar ·{" "}
         {Platform.OS === "ios" ? "vão para Apagados Recentemente" : "o celular pede confirmação antes de apagar"}
       </Text>
 
@@ -139,7 +137,7 @@ export default function Revisar({ fotos, apagar, setApagar, apagarMarcadas, scan
               <View style={s.linha}>
                 <Botao titulo="←" desabilitado={aberta === 0} onPress={() => setAberta(aberta - 1)} />
                 <Botao
-                  titulo={apagar.has(f.id) ? "✕ Vai apagar" : "✓ Vai manter"}
+                  titulo={apagar.has(f.id) ? "⚑ Recusada" : "⚐ Recusar"}
                   tipo={apagar.has(f.id) ? "perigo" : undefined}
                   onPress={() => alternar(f.id)}
                   style={{ flex: 1 }}

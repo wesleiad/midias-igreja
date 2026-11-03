@@ -12,9 +12,9 @@ import Melhorar from "./src/telas/Melhorar.js";
 import Ajustes from "./src/telas/Ajustes.js";
 
 const ABAS = [
-  { id: "inicio", nome: "Escanear", icone: "⌕" },
-  { id: "revisar", nome: "Revisar", icone: "☑" },
-  { id: "melhorar", nome: "Melhorar", icone: "✦" },
+  { id: "inicio", nome: "Importar", icone: "⇣" },
+  { id: "revisar", nome: "Biblioteca", icone: "▦" },
+  { id: "melhorar", nome: "Revelar", icone: "◐" },
   { id: "ajustes", nome: "Ajustes", icone: "⚙" },
 ];
 const porId = (f) => f.id;

@@ -119,10 +119,10 @@ export default function Configuracoes({ cfg, mudarCfg, fotos, logoUrl, recarrega
       <div className="cartao">
         <h2>Filtro padrão</h2>
         <p>
-          Usado sempre que você abre a tela Melhorar: <b>{preset ? preset.nome : "Personalizado"}</b>
+          Usado sempre que você abre Revelar: <b>{preset ? preset.nome : "Personalizado"}</b>
         </p>
         <button className="btn" onClick={() => irPara("melhorar")}>
-          Ajustar na tela Melhorar
+          Ajustar em Revelar
         </button>
       </div>
 
