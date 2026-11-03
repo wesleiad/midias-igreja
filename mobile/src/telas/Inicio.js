@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { Linking, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { pedirPermissao, listarAlbuns } from "../galeria.js";
 import { Botao, Chip, C, s, NOMES_CATEGORIA } from "../ui.js";
 
@@ -9,12 +9,47 @@ const LIMITES = [
   { v: null, nome: "Todas" },
 ];
 
-export default function Inicio({ fotos, scan, apagar, escanear, cancelar, irPara }) {
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+/** Escolha: revisar antes de apagar ou apagar automaticamente. */
+export function EscolhaModo({ cfg, mudarCfg, desabilitado }) {
+  const opcoes = [
+    { id: "revisar", titulo: "Me mostrar antes", texto: "Separa tudo e você confere o que vai apagar." },
+    { id: "automatico", titulo: "Apagar automaticamente", texto: "Ao abrir, varre a galeria e já apaga as tremidas, feias e repetidas." },
+  ];
+  return (
+    <View style={{ gap: 8 }}>
+      {opcoes.map((o) => {
+        const ativo = cfg.modo === o.id;
+        return (
+          <Pressable
+            key={o.id}
+            disabled={desabilitado}
+            onPress={() => mudarCfg({ modo: o.id })}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: ativo }}
+            style={{ flexDirection: "row", gap: 12, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: ativo ? C.pri : "#3a3a3a", backgroundColor: ativo ? "#1d2a3a" : "#1b1b1b", opacity: desabilitado ? 0.5 : 1 }}
+          >
+            <View style={{ width: 18, height: 18, marginTop: 2, borderRadius: 9, borderWidth: 2, borderColor: ativo ? C.pri : "#666", alignItems: "center", justifyContent: "center" }}>
+              {ativo && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.pri }} />}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: C.claro, fontWeight: "600" }}>{o.titulo}</Text>
+              <Text style={[s.suave, { fontSize: 12 }]}>{o.texto}</Text>
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, cancelar, irPara, limpeza }) {
   const [perm, setPerm] = useState(null);
   const [albuns, setAlbuns] = useState([]);
-  const [albumId, setAlbumId] = useState(null);
-  const [limite, setLimite] = useState(200);
-  const ocupado = scan.estado === "listando" || scan.estado === "analisando";
+  const [albumId, setAlbumId] = useState(cfg.ultimaBusca?.albumId ?? null);
+  const [limite, setLimite] = useState(cfg.ultimaBusca ? cfg.ultimaBusca.limite : 200);
+  const ocupado = scan.estado === "listando" || scan.estado === "analisando" || scan.estado === "limpando";
 
   async function permitir() {
     const p = await pedirPermissao();
@@ -86,6 +121,33 @@ export default function Inicio({ fotos, scan, apagar, escanear, cancelar, irPara
             style={{ marginTop: 6 }}
           />
           <Text style={s.suave}>Fotos já analisadas antes são puladas, então da segunda vez é bem mais rápido.</Text>
+          <Text style={s.h3}>Quando encontrar fotos tremidas, feias ou repetidas</Text>
+          <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} desabilitado={ocupado} />
+          {cfg.modo === "automatico" && (
+            <Text style={[s.suave, { fontSize: 12 }]}>
+              As duvidosas nunca são apagadas sozinhas.{" "}
+              {Platform.OS === "ios"
+                ? "As apagadas ficam em Apagados Recentemente por 30 dias."
+                : "O Android sempre pede um \"Permitir\" antes de apagar — isso é do sistema."}
+            </Text>
+          )}
+        </View>
+      )}
+
+      {limpeza && (
+        <View style={[s.cartao, { borderColor: "#1f4a37", backgroundColor: "#13261d" }]}>
+          <Text style={s.h2}>{limpeza.recusou ? "Limpeza não autorizada" : "Limpeza automática concluída"}</Text>
+          <Text style={{ color: "#bfe8d3" }}>
+            {limpeza.recusou
+              ? "O celular não deu permissão pra apagar. As fotos ficaram marcadas na Biblioteca."
+              : limpeza.apagadas > 0
+                ? `${limpeza.apagadas} de ${limpeza.total} fotos apagadas: ${[limpeza.ruins && plural(limpeza.ruins, "tremida/feia", "tremidas/feias"), limpeza.repetidas && plural(limpeza.repetidas, "repetida", "repetidas")].filter(Boolean).join(" e ")}.`
+                : `Nenhuma foto ruim ou repetida entre as ${limpeza.total} analisadas.`}
+          </Text>
+          <View style={s.linha}>
+            <Botao titulo="Melhorar as que ficaram" tipo="primario" onPress={() => irPara("melhorar")} />
+            <Botao titulo="Ver na Biblioteca" onPress={() => irPara("revisar")} />
+          </View>
         </View>
       )}
 
@@ -93,7 +155,7 @@ export default function Inicio({ fotos, scan, apagar, escanear, cancelar, irPara
         <View style={s.cartao}>
           <View style={s.linhaEntre}>
             <Text style={s.texto}>
-              {scan.estado === "listando" ? "Procurando fotos…" : `Analisando ${scan.feitas} de ${scan.total}`}
+              {scan.estado === "listando" ? "Procurando fotos…" : scan.estado === "limpando" ? "Apagando as ruins e repetidas…" : `Analisando ${scan.feitas} de ${scan.total}`}
             </Text>
             <Botao titulo="Parar" onPress={cancelar} />
           </View>
@@ -104,7 +166,7 @@ export default function Inicio({ fotos, scan, apagar, escanear, cancelar, irPara
         </View>
       )}
 
-      {(scan.estado === "pronto" || scan.estado === "cancelado") && fotos.length > 0 && (
+      {(scan.estado === "pronto" || scan.estado === "cancelado") && fotos.length > 0 && !limpeza && (
         <View style={s.cartao}>
           <Text style={s.h2}>{scan.estado === "cancelado" ? "Análise interrompida" : "Resultado"}</Text>
           <View style={s.linha}>

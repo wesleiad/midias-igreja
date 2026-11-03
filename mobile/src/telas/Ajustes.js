@@ -7,6 +7,7 @@ import { salvarLogo, removerLogo, RIGOR } from "../config.js";
 import { abrirReduzida, uriLocal } from "../galeria.js";
 import { renderizar } from "../render.js";
 import { Botao, Chip, Controle, SeletorPosicao, C, s } from "../ui.js";
+import { EscolhaModo } from "./Inicio.js";
 
 export default function Ajustes({ cfg, mudarCfg, fotos, logo, recarregarLogo, irPara }) {
   const { width } = useWindowDimensions();
@@ -99,7 +100,9 @@ export default function Ajustes({ cfg, mudarCfg, fotos, logo, recarregarLogo, ir
       </View>
 
       <View style={s.cartao}>
-        <Text style={s.h2}>Rigor com fotos desfocadas</Text>
+        <Text style={s.h2}>Fotos tremidas, feias ou repetidas</Text>
+        <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} />
+        <Text style={s.h3}>Rigor com fotos desfocadas</Text>
         <View style={s.linha}>
           {Object.entries(RIGOR).map(([id, r]) => (
             <Chip key={id} titulo={r.nome} ativo={cfg.rigor === id} onPress={() => mudarCfg({ rigor: id })} />

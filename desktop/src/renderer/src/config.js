@@ -17,6 +17,8 @@ export const CONFIG_PADRAO = {
   marca: { ...MARCA_PADRAO },
   rigor: "normal",
   incluirSubpastas: true,
+  modo: "revisar", // "revisar" = mostra antes de apagar · "automatico" = varre ao abrir e apaga sozinho
+  ultimaPasta: null,
   qualidadeJpeg: 92,
 };
 

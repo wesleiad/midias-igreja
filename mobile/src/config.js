@@ -19,6 +19,8 @@ const PADRAO = {
   marca: { ...MARCA_PADRAO },
   rigor: "normal",
   qualidadeJpeg: 92,
+  modo: "revisar", // "revisar" = mostra antes · "automatico" = varre ao abrir e apaga sozinho
+  ultimaBusca: null, // { albumId, limite } da última varredura
 };
 
 const arqConfig = () => new File(Paths.document, "config.json");

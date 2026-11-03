@@ -5,7 +5,7 @@ import * as Updates from "expo-updates";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { classificar, sugeridasParaApagar } from "../core/index.js";
 import { useConfig, limitesDoRigor, carregarLogo } from "./src/config.js";
-import { listarFotos, analisarFoto, lerCache, chaveCache, gravarCache, apagarFotos } from "./src/galeria.js";
+import { listarFotos, analisarFoto, lerCache, chaveCache, gravarCache, apagarFotos, pedirPermissao } from "./src/galeria.js";
 import { C, s } from "./src/ui.js";
 import Inicio from "./src/telas/Inicio.js";
 import Revisar from "./src/telas/Revisar.js";
@@ -30,6 +30,8 @@ export default function App() {
   const [logo, setLogo] = useState(null);
   const cancelado = useRef(false);
   const [novaVersao, setNovaVersao] = useState(false);
+  const [limpeza, setLimpeza] = useState(null);
+  const autoIniciou = useRef(false);
 
   // Atualização pelo ar: baixa em segundo plano e oferece reiniciar.
   useEffect(() => {
@@ -49,7 +51,11 @@ export default function App() {
   }, [recarregarLogo]);
 
   async function escanear({ albumId, limite }) {
+    const perm = await pedirPermissao();
+    if (!perm.ok) return;
     cancelado.current = false;
+    setLimpeza(null);
+    mudarCfg({ ultimaBusca: { albumId: albumId || null, limite: limite ?? null } });
     setApagar(new Set());
     setScan({ estado: "listando", feitas: 0, total: 0 });
     const lista = await listarFotos({ albumId, limite });
@@ -95,7 +101,28 @@ export default function App() {
     await Promise.all([trabalhador(), trabalhador()]);
     await gravarCache();
     setBrutas([...atual]);
-    setApagar(new Set(sugeridasParaApagar(classificar(atual, limites, porId)).map((f) => f.id)));
+    const sugeridas = sugeridasParaApagar(classificar(atual, limites, porId));
+    // Modo automático: apaga direto (o sistema ainda pede um "Permitir", isso não dá pra pular).
+    if (!cancelado.current && cfg.modo === "automatico") {
+      setScan({ estado: "limpando", feitas, total: atual.length });
+      let apagadas = 0;
+      if (sugeridas.length) {
+        try {
+          if (await apagarMarcadas(sugeridas.map((f) => f.id))) apagadas = sugeridas.length;
+        } catch {}
+      }
+      setLimpeza({
+        total: atual.length,
+        apagadas,
+        recusou: sugeridas.length > 0 && apagadas === 0,
+        ruins: sugeridas.filter((f) => f.categoria === "ruim").length,
+        repetidas: sugeridas.filter((f) => f.categoria === "duplicada").length,
+      });
+      if (!apagadas) setApagar(new Set(sugeridas.map((f) => f.id)));
+      setScan({ estado: "pronto", feitas, total: atual.length });
+      return;
+    }
+    setApagar(new Set(sugeridas.map((f) => f.id)));
     setScan({ estado: cancelado.current ? "cancelado" : "pronto", feitas, total: atual.length });
     if (!cancelado.current) setAba("revisar");
   }
@@ -108,6 +135,13 @@ export default function App() {
     setApagar((a) => new Set([...a].filter((id) => !saiu.has(id))));
     return true;
   }
+
+  // Modo automático: ao abrir, já varre (mesma busca da última vez) e limpa.
+  useEffect(() => {
+    if (!cfg || autoIniciou.current) return;
+    autoIniciou.current = true;
+    if (cfg.modo === "automatico") escanear(cfg.ultimaBusca || { albumId: null, limite: 200 });
+  }, [cfg]);
 
   if (!cfg) return <View style={s.tela} />;
   const props = { cfg, mudarCfg, fotos, scan, apagar, setApagar, logo, recarregarLogo, irPara: setAba };
@@ -122,7 +156,7 @@ export default function App() {
           </Pressable>
         )}
         <View style={{ flex: 1 }}>
-          {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={() => (cancelado.current = true)} />}
+          {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={() => (cancelado.current = true)} limpeza={limpeza} />}
           {aba === "revisar" && <Revisar {...props} apagarMarcadas={apagarMarcadas} />}
           {aba === "melhorar" && <Melhorar {...props} />}
           {aba === "ajustes" && <Ajustes {...props} />}

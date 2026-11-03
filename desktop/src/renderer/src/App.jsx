@@ -26,6 +26,8 @@ export default function App() {
   const [logoUrl, setLogoUrl] = useState(null);
   const cancelado = useRef(false);
   const [atualizacao, setAtualizacao] = useState(null);
+  const [limpeza, setLimpeza] = useState(null); // resumo da última limpeza automática
+  const autoIniciou = useRef(false);
   useEffect(() => window.api.onAtualizacao(setAtualizacao), []);
 
   const limites = useMemo(() => limitesDoRigor(cfg?.rigor), [cfg?.rigor]);
@@ -52,6 +54,8 @@ export default function App() {
     brutas.forEach((f) => f.miniatura && URL.revokeObjectURL(f.miniatura));
     setBrutas([]);
     setApagar(new Set());
+    setLimpeza(null);
+    mudarCfg({ ultimaPasta: pasta });
     setScan({ estado: "listando", feitas: 0, total: 0, pasta, ignoradas: [] });
     const { fotos: lista, ignoradas } = await window.api.listarFotos(pasta, cfg.incluirSubpastas);
     const base = lista.map((f) => ({ ...f, medidas: null }));
@@ -84,8 +88,23 @@ export default function App() {
       ),
     );
     atualizar(true);
-    // Já deixa marcadas pra apagar as ruins (que abriram) e as repetidas.
-    setApagar(new Set(sugeridasParaApagar(classificar(atual, limites, porCaminho)).map((f) => f.caminho)));
+    // Ruins (que abriram) e repetidas: no modo automático vão direto pra Lixeira;
+    // no modo revisar, só ficam marcadas pra pessoa conferir.
+    const sugeridas = sugeridasParaApagar(classificar(atual, limites, porCaminho));
+    if (!cancelado.current && cfg.modo === "automatico") {
+      setScan((s) => ({ ...s, estado: "limpando", feitas }));
+      const r = sugeridas.length ? await moverParaLixeira(sugeridas.map((f) => f.caminho)) : { movidas: 0, falhas: [] };
+      setLimpeza({
+        total: atual.length,
+        movidas: r.movidas,
+        falhas: r.falhas.length,
+        ruins: sugeridas.filter((f) => f.categoria === "ruim").length,
+        repetidas: sugeridas.filter((f) => f.categoria === "duplicada").length,
+      });
+      setScan((s) => ({ ...s, estado: "pronto", feitas }));
+      return;
+    }
+    setApagar(new Set(sugeridas.map((f) => f.caminho)));
     setScan((s) => ({ ...s, estado: cancelado.current ? "cancelado" : "pronto", feitas }));
     if (!cancelado.current) setAba("revisar");
   }
@@ -106,6 +125,13 @@ export default function App() {
     setApagar((s) => new Set([...s].filter((c) => !saiu.has(c))));
     return r;
   }
+
+  // Modo automático: ao abrir o app, já varre a última pasta e limpa.
+  useEffect(() => {
+    if (!cfg || autoIniciou.current) return;
+    autoIniciou.current = true;
+    if (cfg.modo === "automatico" && cfg.ultimaPasta) escanear(cfg.ultimaPasta);
+  }, [cfg]);
 
   if (!cfg) return <div className="carregando">Abrindo…</div>;
 
@@ -141,7 +167,7 @@ export default function App() {
         </nav>
       </header>
       <main className={"conteudo modulo-" + aba}>
-        {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={cancelar} />}
+        {aba === "inicio" && <Inicio {...props} escanear={escanear} cancelar={cancelar} limpeza={limpeza} />}
         {aba === "revisar" && <Revisar {...props} moverParaLixeira={moverParaLixeira} />}
         {aba === "melhorar" && <Melhorar {...props} />}
         {aba === "config" && <Configuracoes {...props} />}

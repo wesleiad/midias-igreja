@@ -1,7 +1,35 @@
 import { contarCategorias, NOMES_CATEGORIA } from "../util.js";
 
-export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, cancelar, irPara }) {
-  const ocupado = scan.estado === "listando" || scan.estado === "analisando";
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+const resumoLimpeza = (l) =>
+  [l.ruins && plural(l.ruins, "tremida/feia", "tremidas/feias"), l.repetidas && plural(l.repetidas, "repetida", "repetidas")].filter(Boolean).join(" e ");
+
+export function EscolhaModo({ cfg, mudarCfg, desabilitado }) {
+  const opcoes = [
+    { id: "revisar", titulo: "Me mostrar antes", texto: "Separa tudo e você confere na Biblioteca o que vai apagar." },
+    {
+      id: "automatico",
+      titulo: "Apagar automaticamente",
+      texto: "Ao abrir, varre a última pasta e já manda as tremidas, feias e repetidas pra Lixeira.",
+    },
+  ];
+  return (
+    <div className="escolha-modo" role="radiogroup" aria-label="O que fazer com fotos ruins e repetidas">
+      {opcoes.map((o) => (
+        <button key={o.id} role="radio" aria-checked={cfg.modo === o.id} className={cfg.modo === o.id ? "ativo" : ""} disabled={desabilitado} onClick={() => mudarCfg({ modo: o.id })}>
+          <span className="radio" />
+          <span>
+            <strong>{o.titulo}</strong>
+            <small>{o.texto}</small>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, cancelar, irPara, limpeza }) {
+  const ocupado = scan.estado === "listando" || scan.estado === "analisando" || scan.estado === "limpando";
   const pct = scan.total ? Math.round((scan.feitas / scan.total) * 100) : 0;
   const cont = contarCategorias(fotos);
 
@@ -37,12 +65,47 @@ export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, c
             Incluir subpastas
           </label>
         </div>
+        <div className="sub-rot-modo">Quando encontrar fotos tremidas, feias ou repetidas:</div>
+        <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} desabilitado={ocupado} />
+        {cfg.modo === "automatico" && (
+          <p className="dica">
+            As duvidosas nunca são apagadas sozinhas. Tudo vai para a Lixeira do Windows, então dá pra recuperar.
+          </p>
+        )}
       </div>
+
+      {limpeza && (
+        <div className="cartao ok-limpeza">
+          <h2>Limpeza automática concluída</h2>
+          <p>
+            {limpeza.movidas > 0 ? (
+              <>
+                <b>{limpeza.movidas}</b> de {limpeza.total} fotos foram para a Lixeira: {resumoLimpeza(limpeza)}.
+              </>
+            ) : (
+              <>Nenhuma foto ruim ou repetida entre as {limpeza.total} analisadas.</>
+            )}
+            {limpeza.falhas > 0 && ` ${limpeza.falhas} não puderam ser movidas (arquivo em uso).`}
+          </p>
+          <div className="linha-acoes">
+            <button className="btn primario" onClick={() => irPara("melhorar")}>
+              Melhorar as que ficaram
+            </button>
+            <button className="btn" onClick={() => irPara("revisar")}>
+              Ver na Biblioteca
+            </button>
+          </div>
+        </div>
+      )}
 
       {ocupado && (
         <div className="cartao">
           <div className="progresso-topo">
-            <strong>{scan.estado === "listando" ? "Procurando fotos…" : `Analisando ${scan.feitas} de ${scan.total}`}</strong>
+            <strong>{scan.estado === "listando"
+                ? "Procurando fotos…"
+                : scan.estado === "limpando"
+                  ? "Movendo as ruins e repetidas para a Lixeira…"
+                  : `Analisando ${scan.feitas} de ${scan.total}`}</strong>
             <button className="btn pequeno" onClick={cancelar}>
               Parar
             </button>
@@ -57,7 +120,7 @@ export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, c
         <div className="cartao aviso">Nenhuma foto (JPG, PNG, WEBP) encontrada nessa pasta.</div>
       )}
 
-      {(scan.estado === "pronto" || scan.estado === "cancelado") && fotos.length > 0 && (
+      {(scan.estado === "pronto" || scan.estado === "cancelado") && fotos.length > 0 && !limpeza && (
         <div className="cartao">
           <h2>{scan.estado === "cancelado" ? "Análise interrompida" : "Resultado"}</h2>
           <div className="resumo">

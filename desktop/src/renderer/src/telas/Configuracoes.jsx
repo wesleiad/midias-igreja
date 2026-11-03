@@ -3,6 +3,7 @@ import { PRESETS, retanguloMarca } from "@core/index.js";
 import { urlFoto } from "../motor.js";
 import { RIGOR } from "../config.js";
 import { Controle, SeletorPosicao } from "./componentes.jsx";
+import { EscolhaModo } from "./Inicio.jsx";
 
 // Converte qualquer imagem (inclusive SVG) em PNG de até 1200px, preservando a transparência.
 async function paraPng(caminho) {
@@ -132,6 +133,9 @@ export default function Configuracoes({ cfg, mudarCfg, fotos, logoUrl, recarrega
 
       <div className="cartao">
         <h2>Análise</h2>
+        <span className="rotulo">Quando encontrar fotos tremidas, feias ou repetidas</span>
+        <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} />
+        <div style={{ height: "1rem" }} />
         <label className="campo">
           <span>Rigor com fotos desfocadas</span>
           <select value={cfg.rigor} onChange={(e) => mudarCfg({ rigor: e.target.value })}>

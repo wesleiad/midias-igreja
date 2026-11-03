@@ -123,6 +123,23 @@ select {
 .cat-boa { border-color: var(--boa); } .cat-duvida { border-color: var(--duvida); }
 .cat-ruim { border-color: var(--ruim); } .cat-duplicada { border-color: var(--duplicada); }
 
+/* ---------- Escolha do modo (revisar x automático) ---------- */
+.sub-rot-modo { margin: 1.6rem 0 .6rem; font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: #8f8f8f; }
+.escolha-modo { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; max-width: 760px; }
+.escolha-modo button {
+  display: flex; gap: .75rem; align-items: flex-start; text-align: left; cursor: pointer;
+  background: #1b1b1bcc; border: 1px solid var(--borda2); border-radius: 8px; padding: .85rem 1rem; color: var(--texto);
+}
+.escolha-modo button:hover:not(:disabled) { border-color: #555; }
+.escolha-modo button.ativo { border-color: var(--pri); background: #1d2a3a; }
+.escolha-modo button:disabled { opacity: .5; cursor: default; }
+.escolha-modo strong { display: block; color: var(--claro); font-weight: 600; margin-bottom: .15rem; }
+.escolha-modo small { color: #9a9a9a; font-size: .8rem; line-height: 1.35; }
+.escolha-modo .radio { flex: 0 0 16px; height: 16px; margin-top: 2px; border-radius: 50%; border: 2px solid #666; }
+.escolha-modo .ativo .radio { border-color: var(--pri); box-shadow: inset 0 0 0 3px #1d2a3a, inset 0 0 0 8px var(--pri); }
+.cartao.ok-limpeza { border-color: #1f4a37; background: linear-gradient(180deg, #13261d, #181818); }
+.cartao.ok-limpeza p { color: #bfe8d3; margin: 0 0 1rem; }
+
 /* ---------- Sliders estilo editor ---------- */
 .controle {
   display: grid; grid-template-columns: 74px 1fr 40px; align-items: center; gap: .55rem;
@@ -332,6 +349,7 @@ input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); backgro
   .tela { padding: 1rem; }
   .cartao.destaque { padding: 1.4rem; }
   .resumo { grid-template-columns: repeat(2, 1fr); }
+  .escolha-modo { grid-template-columns: 1fr; }
   .palco { height: 48vh; padding: 6px; }
   .biblioteca { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
   .painel-esq { border-right: 0; border-bottom: 1px solid #262626; padding: .4rem; overflow: visible; }
