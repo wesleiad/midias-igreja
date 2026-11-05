@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PRESETS, completarAjuste } from "@core/index.js";
 import { executar, limparFila, urlFoto } from "../motor.js";
 import { Controle, Secao, Histograma, SeletorPosicao } from "./componentes.jsx";
+import { NAVEGADOR } from "../util.js";
 
 export default function Melhorar({ cfg, mudarCfg, fotos, apagar, logoUrl, scan, irPara }) {
   const [presetId, setPresetId] = useState(cfg.filtroPadrao.presetId);
@@ -253,7 +254,11 @@ export default function Melhorar({ cfg, mudarCfg, fotos, apagar, logoUrl, scan, 
             <div className="barra">
               <div style={{ width: (proc.total ? (proc.feitas / proc.total) * 100 : 0) + "%" }} />
             </div>
-            <p className="dica">Salvas em "Fotos Melhoradas", ao lado das originais. As originais não mudam.</p>
+            <p className="dica">
+              {NAVEGADOR
+                ? 'Quando terminar, toque em "Salvar na galeria" e escolha "Salvar imagens". As originais não mudam.'
+                : 'Salvas em "Fotos Melhoradas", ao lado das originais. As originais não mudam.'}
+            </p>
             <div className="linha-acoes fim">
               {!proc.fim ? (
                 <button
@@ -270,9 +275,15 @@ export default function Melhorar({ cfg, mudarCfg, fotos, apagar, logoUrl, scan, 
                   <button className="btn" onClick={() => setProc(null)}>
                     Fechar
                   </button>
-                  <button className="btn primario" onClick={() => window.api.abrirPasta(scan.pasta + "\\Fotos Melhoradas")}>
-                    Abrir pasta
-                  </button>
+                  {NAVEGADOR ? (
+                    <button className="btn primario" disabled={proc.feitas === proc.erros} onClick={() => window.api.salvarMelhoradas()}>
+                      Salvar na galeria
+                    </button>
+                  ) : (
+                    <button className="btn primario" onClick={() => window.api.abrirPasta(scan.pasta + "\\Fotos Melhoradas")}>
+                      Abrir pasta
+                    </button>
+                  )}
                 </>
               )}
             </div>

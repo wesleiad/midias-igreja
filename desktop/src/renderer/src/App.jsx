@@ -41,7 +41,8 @@ export default function App() {
       await definirLogo(null);
       return;
     }
-    const blob = await (await fetch(urlFoto(caminho) + "?t=" + Date.now())).blob();
+    const u = urlFoto(caminho);
+    const blob = await (await fetch(u.startsWith("blob:") ? u : u + "?t=" + Date.now())).blob();
     setLogoUrl((u) => (u && URL.revokeObjectURL(u), URL.createObjectURL(blob)));
     await definirLogo(blob);
   }, []);

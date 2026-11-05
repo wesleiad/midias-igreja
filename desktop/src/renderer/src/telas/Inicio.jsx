@@ -1,4 +1,4 @@
-import { contarCategorias, NOMES_CATEGORIA } from "../util.js";
+import { contarCategorias, NOMES_CATEGORIA, NAVEGADOR } from "../util.js";
 
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const resumoLimpeza = (l) =>
@@ -42,32 +42,50 @@ export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, c
     <section className="tela inicio">
       <div className="cartao destaque">
         <h1>Separe as fotos boas em poucos minutos</h1>
-        <p className="sub">
-          Escolha a pasta das fotos. O app verifica nitidez, luz e repetidas, sugere o que apagar (vai para a Lixeira, dá pra
-          recuperar) e depois melhora as que ficaram, com a marca d'água da igreja se quiser.
-        </p>
+        {NAVEGADOR ? (
+          <p className="sub">
+            Escolha as fotos (dá pra marcar várias de uma vez). O app verifica nitidez, luz e repetidas, mostra quais estão ruins
+            e melhora as que ficaram, com a marca d'água da igreja se quiser. Nada sai do seu celular.
+          </p>
+        ) : (
+          <p className="sub">
+            Escolha a pasta das fotos. O app verifica nitidez, luz e repetidas, sugere o que apagar (vai para a Lixeira, dá pra
+            recuperar) e depois melhora as que ficaram, com a marca d'água da igreja se quiser.
+          </p>
+        )}
         <div className="linha-acoes">
           <button className="btn primario grande" onClick={escolher} disabled={ocupado}>
-            {scan.pasta ? "Escanear outra pasta" : "Escolher pasta das fotos"}
+            {NAVEGADOR ? (scan.pasta ? "Escolher outras fotos" : "Escolher fotos") : scan.pasta ? "Escanear outra pasta" : "Escolher pasta das fotos"}
           </button>
-          {scan.pasta && !ocupado && (
+          {scan.pasta && !ocupado && !NAVEGADOR && (
             <button className="btn" onClick={() => escanear(scan.pasta)}>
               Escanear de novo
             </button>
           )}
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={cfg.incluirSubpastas}
-              onChange={(e) => mudarCfg({ incluirSubpastas: e.target.checked })}
-              disabled={ocupado}
-            />
-            Incluir subpastas
-          </label>
+          {!NAVEGADOR && (
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={cfg.incluirSubpastas}
+                onChange={(e) => mudarCfg({ incluirSubpastas: e.target.checked })}
+                disabled={ocupado}
+              />
+              Incluir subpastas
+            </label>
+          )}
         </div>
-        <div className="sub-rot-modo">Quando encontrar fotos tremidas, feias ou repetidas:</div>
-        <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} desabilitado={ocupado} />
-        {cfg.modo === "automatico" && (
+        {!NAVEGADOR && (
+          <>
+            <div className="sub-rot-modo">Quando encontrar fotos tremidas, feias ou repetidas:</div>
+            <EscolhaModo cfg={cfg} mudarCfg={mudarCfg} desabilitado={ocupado} />
+          </>
+        )}
+        {NAVEGADOR && (
+          <p className="dica">
+            O navegador não consegue apagar fotos da galeria: o app mostra as ruins e repetidas, e você apaga no app Fotos.
+          </p>
+        )}
+        {cfg.modo === "automatico" && !NAVEGADOR && (
           <p className="dica">
             As duvidosas nunca são apagadas sozinhas. Tudo vai para a Lixeira do Windows, então dá pra recuperar.
           </p>
@@ -117,7 +135,9 @@ export default function Inicio({ cfg, mudarCfg, fotos, scan, apagar, escanear, c
       )}
 
       {scan.estado === "pronto" && scan.total === 0 && (
-        <div className="cartao aviso">Nenhuma foto (JPG, PNG, WEBP) encontrada nessa pasta.</div>
+        <div className="cartao aviso">
+          {NAVEGADOR ? "Nenhuma foto escolhida." : "Nenhuma foto (JPG, PNG, WEBP) encontrada nessa pasta."}
+        </div>
       )}
 
       {(scan.estado === "pronto" || scan.estado === "cancelado") && fotos.length > 0 && !limpeza && (

@@ -1,0 +1,7 @@
+/* Só no site: respeita o entalhe e a barrinha do iPhone quando aberto pela Tela de Início. */
+.topo { padding-top: env(safe-area-inset-top); height: calc(52px + env(safe-area-inset-top)); }
+@media (max-width: 720px) {
+  .topo { height: calc(48px + env(safe-area-inset-top)); }
+  .app { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+  .abas { padding-bottom: calc(.25rem + env(safe-area-inset-bottom)); }
+}

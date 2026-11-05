@@ -1,5 +1,5 @@
 // Fila de workers: usa vários núcleos sem travar a tela.
-const QTD = Math.max(2, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
+const QTD = window.api?.maxWorkers || Math.max(2, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
 
 const workers = [];
 const fila = [];
@@ -61,4 +61,6 @@ export async function definirLogo(blob) {
   );
 }
 
-export const urlFoto = (caminho) => "foto://local/" + encodeURIComponent(caminho);
+// No site (navegador) cada foto escolhida vira um endereço blob: próprio.
+export const urlFoto = (caminho) =>
+  window.api?.urlFoto ? window.api.urlFoto(caminho) : "foto://local/" + encodeURIComponent(caminho);

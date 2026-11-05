@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { urlFoto } from "../motor.js";
-import { contarCategorias, NOMES_CATEGORIA, formatarBytes } from "../util.js";
+import { contarCategorias, NOMES_CATEGORIA, formatarBytes, NAVEGADOR } from "../util.js";
 import { Histograma } from "./componentes.jsx";
 
 const ORDEM = ["ruim", "duplicada", "duvida", "boa"];
@@ -67,7 +67,9 @@ export default function Revisar({ fotos, apagar, setApagar, moverParaLixeira, sc
     setTrabalhando(false);
     setConfirmar(false);
     setMsg(
-      r.falhas.length
+      NAVEGADOR
+        ? `${r.movidas} fotos saíram da lista e não vão ser melhoradas. Para liberar espaço, apague-as no app Fotos.`
+        : r.falhas.length
         ? `${r.movidas} foram para a Lixeira. ${r.falhas.length} não deu pra mover (arquivo em uso ou sem permissão).`
         : `${r.movidas} fotos foram para a Lixeira. Se precisar, dá pra restaurar por lá.`,
     );
@@ -165,7 +167,7 @@ export default function Revisar({ fotos, apagar, setApagar, moverParaLixeira, sc
             <b>{marcadas.length}</b> recusadas
           </span>
           <button className="btn perigo" disabled={!marcadas.length} onClick={() => setConfirmar(true)}>
-            Mover recusadas para a Lixeira
+            {NAVEGADOR ? "Tirar recusadas da lista" : "Mover recusadas para a Lixeira"}
           </button>
         </div>
       </div>
@@ -224,14 +226,26 @@ export default function Revisar({ fotos, apagar, setApagar, moverParaLixeira, sc
       {confirmar && (
         <div className="modal" onClick={() => !trabalhando && setConfirmar(false)}>
           <div className="caixa" onClick={(e) => e.stopPropagation()}>
-            <h2>Mover {marcadas.length} fotos para a Lixeira?</h2>
-            <p>Elas saem da pasta, mas ficam na Lixeira do Windows. Dá pra restaurar enquanto você não esvaziar a Lixeira.</p>
+            {NAVEGADOR ? (
+              <>
+                <h2>Tirar {marcadas.length} fotos da lista?</h2>
+                <p>
+                  O navegador não consegue apagar fotos da galeria do celular. Elas só saem daqui (não vão ser melhoradas). Para
+                  liberar espaço, apague-as depois no app Fotos.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2>Mover {marcadas.length} fotos para a Lixeira?</h2>
+                <p>Elas saem da pasta, mas ficam na Lixeira do Windows. Dá pra restaurar enquanto você não esvaziar a Lixeira.</p>
+              </>
+            )}
             <div className="linha-acoes fim">
               <button className="btn" disabled={trabalhando} onClick={() => setConfirmar(false)}>
                 Cancelar
               </button>
               <button className="btn perigo" disabled={trabalhando} onClick={apagarAgora}>
-                {trabalhando ? "Movendo…" : "Sim, mover"}
+                {trabalhando ? "Movendo…" : NAVEGADOR ? "Sim, tirar" : "Sim, mover"}
               </button>
             </div>
           </div>

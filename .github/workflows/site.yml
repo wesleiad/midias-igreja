@@ -1,0 +1,42 @@
+# A cada envio pro GitHub que mexa no site (ou nas telas/core que ele reaproveita): publica no GitHub Pages.
+# Endereço: https://wesleiad.github.io/midias-igreja/  (no iPhone: Safari > Compartilhar > Adicionar à Tela de Início)
+name: Site - publicar
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "core/**", "desktop/src/renderer/**", "desktop/build/icon.png", ".github/workflows/site.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency: site-pages
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          VERSAO_SITE: "web.${{ github.run_number }}"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,3 +1,6 @@
+// true quando roda como site (iPhone/navegador): não dá pra apagar da galeria nem gravar em pasta.
+export const NAVEGADOR = !!window.api?.navegador;
+
 export const NOMES_CATEGORIA = {
   boa: "Boas",
   duvida: "Duvidosas",
